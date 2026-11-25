@@ -1,0 +1,16 @@
+# 跑起来才会生成的东西
+logs/
+**/logs/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+.mypy_cache/
+.pytest_cache/
+.venv/
+venv/
+
+# 本地跑出来的临时件
+*.log
+.DS_Store
+Thumbs.db
