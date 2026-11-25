@@ -25,7 +25,7 @@ v1.2/    结业时它长的样子
 | 想对比两个版本差在哪 | 直接看 GitHub 的 `compare/v0.1...v0.2`，或者 `diff -r v0.1 v0.2` |
 | 维护课程的人 | 看下面的「维护约定」和 [CHANGELOG.md](CHANGELOG.md) |
 
-跑起来只要三条命令（Python 3.9+，不需要 `pip install`）：
+跑起来只要三条命令（Python 3.10+，不需要 `pip install`）：
 
 ```bash
 cd v0.1
