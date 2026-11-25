@@ -5,6 +5,53 @@
 
 ---
 
+## v0.2 — 会查、会算钱
+
+第 2 幕 · 课程 2.1–2.15 · 2026-11-25
+
+### 多了什么
+
+- `agent/context.py`：`pack_context()` 按预算装填。系统规则第一条不动，
+  资料按相关度挑最多 3 条（装不下就跳过，不截半句），历史从最近往回装，
+  问题永远最后一条。预算 = 窗口 − 512（留给模型写回答）。`plan()` 把这次
+  装进去哪几条、挤掉几条摊开，`--debug` 打的就是它。
+- `agent/schemas.py`：工具参数的契约 + `check()`。类型 / 范围 / 枚举 / 多余字段
+  四类一律拒，拒绝理由必须点名是哪个字段和合法范围（这句话要原样回传给模型重填）。
+  `bool` 单独挡（Python 里 `True` 是 `int` 的子类）。
+- `agent/tools.py`：`query_classroom` + `call()`。三种结果同形：
+  成功 / 参数错（`retryable=True`）/ 没这工具。参数错不抛异常，退回去重填。
+  `wants_tool()` / `guess_args()` 是模型的替身，第 4 幕换成真循环。
+- `agent/router.py`：三档模型 + `classify()` + `route()` + `price()`。
+  规则硬（难度不越级、成本不超、要 JSON 得支持、同档取最便宜），
+  全都不满足时降档并标 `degraded`。
+- `agent/llm.py`：`chat(..., model=)` 透传；网关不认 `model` 就忽略。
+- `data/classrooms.json`：七个教室的占用表（示例数据）。
+- 日志多三列：`model` / `cost` / `docs`，`tool` 记这一轮调了什么工具、成没成。
+- 验收 6 条 → 10 条，单测 8 → 20 条。
+
+### 怎么验收
+
+```bash
+cd v0.2
+python -m agent "明天下午三教有空教室吗"   # 打印工具调用 + JSON 结果
+python -m agent "三教 25点有空教室吗"      # 工具拒绝，理由点名 slot
+python -m agent "转专业什么时候能申请" --debug   # 路由理由 + 装填计划
+python tools/check.py                      # 10/10
+python -m unittest discover -s tests -v    # 20 passed
+```
+
+### 故意留着没修的
+
+| 问题 | 什么时候修 |
+|---|---|
+| 找资料还是两个字重合：问「转专业要准备什么材料」先命中奖学金 | 第 5 幕 |
+| 24 轮历史「能装多少装多少」，最早的约定会掉出去 | 第 3 幕 |
+| 工具调用是规则猜参数，不是模型自己决定调几次 | 第 4 幕 |
+| 没有评测集，改完不知道真变好还是碰巧 | 第 8 幕 |
+| 没有重试 / 降级到另一家 | 第 9 幕 |
+
+---
+
 ## v0.1 — 能对话
 
 第 1 幕 · 课程 1.1–1.12 · 2026-11-25
@@ -47,10 +94,3 @@ python -m unittest discover -s tests -v    # 8 passed
 `v0.1/README.md` 末尾也列了这四条，学生一进项目就能看见。
 
 ---
-
-## v0.2 — 会查、会算钱
-
-第 2 幕 · 课程 2.1–2.14 · 开发中
-
-计划：`agent/context.py`（挑资料装窗口）、`agent/schemas.py`（严格 JSON）、
-`agent/router.py`（按难度分流模型）。做完再补这一节。
