@@ -1,0 +1,46 @@
+name: check
+
+# 每一版都是一份能独立跑的程序。这个 workflow 只证明一件事：
+# 仓库里每个 v*/ 文件夹，现在还是能跑起来、还过得了它自己那 6 条验收。
+# 加一版不用改这里——目录名对得上就会被扫到。
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  versions:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.9", "3.11"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: 逐版跑验收 + 单测
+        run: |
+          fail=0
+          shopt -s nullglob
+          dirs=(v*/)
+          if [ ${#dirs[@]} -eq 0 ]; then echo "仓库里没有版本文件夹"; exit 1; fi
+          for d in "${dirs[@]}"; do
+            echo "::group::$d (python ${{ matrix.python }})"
+            ( cd "$d" && python tools/check.py && python -m unittest discover -s tests -v ) || fail=1
+            echo "::endgroup::"
+          done
+          exit $fail
+
+      - name: 根目录该有的文件都在
+        run: |
+          test -f README.md && test -f CHANGELOG.md
+          for d in v*/; do
+            test -f "$d/SPEC.md" || { echo "::error::$d 少了 SPEC.md"; exit 1; }
+            test -f "$d/README.md" || { echo "::error::$d 少了 README.md"; exit 1; }
+          done
+          echo "版本文件夹结构 OK"

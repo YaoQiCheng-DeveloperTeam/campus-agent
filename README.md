@@ -1,5 +1,7 @@
 # campus-agent
 
+[![check](https://github.com/YaoQiCheng-DeveloperTeam/campus-agent/actions/workflows/check.yml/badge.svg)](https://github.com/YaoQiCheng-DeveloperTeam/campus-agent/actions/workflows/check.yml)
+
 「灯塔计划」那门课里，学生要亲手做出来的那个项目：一个班级群里能用的校园助手。
 问它图书馆几点关门、一卡通丢了去哪补办、空调坏了找谁，它答得上来，而且给出处。
 
@@ -121,7 +123,9 @@ v0.1/
    - 课程站点的 `starter/campus-agent` 由课程仓库的 `npm run sync:agent` 从本仓库同步，**不要两边各改一份**。
 4. **数据只有一个来源。** `data/docs.json` 由课程仓库的 `server/proj/seed.py` 导出，
    改资料去改 seed，不要手改 JSON。
-5. 提交信息写「v0.3: 加了什么」，不要写「update」。
+5. **每个 `v*/` 都得能跑。** CI 会对每个版本跑一遍 `tools/check.py` + 单测
+   （`.github/workflows/check.yml`），红了别合并。加一版不用改 CI，目录名对得上就会被扫到。
+6. 提交信息写「v0.3: 加了什么」，不要写「update」。
 
 ---
 
